@@ -1,0 +1,25 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local uploads sandbox (never commit user forensic artifacts or logs)
+uploads/*
+!uploads/.gitkeep
+
+# Temporary / testing logs
+*.log
+.coverage
+
+# Environments
+.venv/
+env/
+venv/
+
+# OS / Editor metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.bak

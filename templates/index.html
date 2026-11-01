@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athena | Hub</title>
+  <link rel="stylesheet" href="/static/style.css?v=20261029k">
+</head>
+<body class="meander-canvas">
+
+  <!-- 🏛️ Top Navigation Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="/" class="brand-link">
+        <img src="/logos/athena%20purple.png" alt="Athena Logo" class="brand-logo-img">
+        <div>
+          <div class="brand-title">ATHENA</div>
+          <div class="brand-greek-sub">PURPLE TEAM SUITE</div>
+        </div>
+      </a>
+
+      <div class="nav-pills">
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          <span id="server-status-label">Localhost 127.0.0.1:8080</span>
+        </div>
+        <a href="/red" class="nav-link-btn btn-red">🔴 Offensive Wing</a>
+        <a href="/blue" class="nav-link-btn btn-blue">🔵 Defensive Wing</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 🏛️ Greek Meander Ribbon Divider -->
+  <div class="meander-ribbon purple"></div>
+
+  <!-- 🟣 Hero Section -->
+  <main class="container">
+    <section class="hero-hub">
+      <div class="hero-badge">Dual-Use Offensive & Defensive Cyber Operations</div>
+      <img src="/logos/athena%20purple.png" alt="Athena Purple Team Suite" class="hero-logo-img">
+      <p class="hero-subtitle">
+        An ultra-fast, zero-dependency cybersecurity control platform uniting penetration testing, attack surface mapping, and incident response into a unified purple control center.
+      </p>
+
+      <!-- Metrics Ribbon -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-number">14</div>
+          <div class="metric-label">Security Modules</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-number">0</div>
+          <div class="metric-label">External Dependencies</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-number">100%</div>
+          <div class="metric-label">Localhost Air-Gapped</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-number">v2.0</div>
+          <div class="metric-label">Production Release</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 🚪 Hero Split Portals (Red vs Blue) -->
+    <section class="split-portals-grid">
+
+      <!-- 🔴 RED TEAM (The Spear) -->
+      <a href="/red" class="portal-card red-portal">
+        <div>
+          <div class="portal-header">
+            <span class="portal-tag">Offensive Wing • The Spear</span>
+          </div>
+
+          <img src="/logos/athena%20red.png" alt="Offensive Wing - The Spear" class="portal-logo-img">
+          <p class="portal-desc">
+            Map external attack surfaces, audit security headers, test for password leaks, scan dependencies for CVEs, audit JWT tokens, inspect TLS ciphers, and test upload handlers.
+          </p>
+
+          <div class="tools-badge-list">
+            <span class="tool-chip">site_mapper</span>
+            <span class="tool-chip">security_headers</span>
+            <span class="tool-chip">breach_checker</span>
+            <span class="tool-chip">cve_scanner</span>
+            <span class="tool-chip">jwt_auditor</span>
+            <span class="tool-chip">tls_inspector</span>
+            <span class="tool-chip">php2shell_audit</span>
+          </div>
+        </div>
+
+        <div class="portal-action-btn">
+          <span>Enter Offensive Console</span>
+          <span>&rarr;</span>
+        </div>
+      </a>
+
+      <!-- 🔵 BLUE TEAM (The Aegis Shield) -->
+      <a href="/blue" class="portal-card blue-portal">
+        <div>
+          <div class="portal-header">
+            <span class="portal-tag">Defensive Wing • The Aegis Shield</span>
+          </div>
+
+          <img src="/logos/athena%20blue.png" alt="Defensive Wing - The Aegis Shield" class="portal-logo-img">
+          <p class="portal-desc">
+            Forensic incident response: parse SSH auth logs for brute-force attacks, monitor file integrity (FIM), analyze phishing emails, hunt threats in PCAPs, triage malware binaries, and defang IOCs.
+          </p>
+
+          <div class="tools-badge-list">
+            <span class="tool-chip">ssh_analyzer</span>
+            <span class="tool-chip">fim_monitor</span>
+            <span class="tool-chip">phishing_analyzer</span>
+            <span class="tool-chip">pcap_hunter</span>
+            <span class="tool-chip">malware_triage</span>
+            <span class="tool-chip">ioc_extractor</span>
+            <span class="tool-chip">php2shell_detect</span>
+          </div>
+        </div>
+
+        <div class="portal-action-btn">
+          <span>Enter Defensive Console</span>
+          <span>&rarr;</span>
+        </div>
+      </a>
+
+    </section>
+  </main>
+
+  <!-- 🏛️ Greek Meander Ribbon Divider -->
+  <div class="meander-ribbon purple"></div>
+
+  <!-- ⚖️ Legal & Ethical Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-legal-box">
+        <div class="footer-legal-title">
+          <span>⚖️</span>
+          <span>LEGAL & ETHICAL DISCLAIMER - AUTHORIZED USE ONLY</span>
+        </div>
+        <p>
+          Athena is developed strictly for educational purposes, authorized security research, CTF competitions, and professional penetration testing / SOC operations conducted under explicit, written authorization. Unauthorized probing, scanning, or credential testing against target systems without legal consent is strictly prohibited under local and international computer misuse laws.
+        </p>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 Alexandru Iosif Mocanu (Sonelu). All rights reserved. Distributed under the MIT License.</div>
+        <div>Athena Purple Team Suite v2.0 • Air-Gapped Localhost Platform</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Vanilla JS Live Status Poller -->
+  <script>
+    async function updateStatus() {
+      try {
+        const res = await fetch('/api/status');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('server-status-label').textContent = 
+            `Localhost 127.0.0.1:8080 • ${data.tools_count} Modules Active`;
+        }
+      } catch (e) {
+        document.getElementById('server-status-label').textContent = 'Connecting...';
+      }
+    }
+    updateStatus();
+    setInterval(updateStatus, 10000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,485 @@
+#!/usr/bin/env python3
+"""
+CVE Dependency & Supply-Chain Scanner v2.0 (Red Team - Supply-Chain & SCA Auditor)
+
+Audits Python (requirements.txt, pyproject.toml, Pipfile.lock, poetry.lock) and Node.js
+(package.json, package-lock.json) manifests against Google's live OSV.dev vulnerability
+database (zero API keys required):
+  1. Multi-Ecosystem Lockfile & Manifest Parsing (6 formats across PyPI & npm)
+  2. Official CVSS v3.1 Base Score Calculation (0.0–10.0) from OSV CVSS vector strings
+  3. Auto-Generated Remediation Upgrade Command (pip install --upgrade / npm install)
+  4. OASIS SARIF 2.1.0 (.sarif), Markdown (.md), and JSON (.json) Report Export (-o)
+
+OWASP Top 10: A06:2021 (Vulnerable and Outdated Components)
+MITRE ATT&CK: T1195.001 (Compromise Software Dependencies and Development Tools)
+
+Uses only the Python standard library.
+"""
+
+import argparse
+import json
+import math
+import re
+import sys
+import urllib.error
+import urllib.request
+from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+OSV_BATCH_URL = "https://api.osv.dev/v1/querybatch"
+OSV_VULN_URL = "https://api.osv.dev/v1/vulns/{}"
+REQ_LINE_RE = re.compile(r"^([A-Za-z0-9_.-]+)(?:\[[^\]]+\])?\s*(?:==|>=|~=|=)\s*([A-Za-z0-9_.+-]+)")
+
+DEMO_REQUIREMENTS = """\
+# Sample web application dependencies (used with --demo)
+Flask==0.12.2
+requests==2.19.0
+PyYAML==5.3.1
+urllib3==1.24.1
+Jinja2==2.10
+markupsafe==2.1.5
+"""
+
+# CVSS v3.1 Metric Weights (FIRST.org Specification)
+CVSS_AV = {"N": 0.85, "A": 0.62, "L": 0.55, "P": 0.20}
+CVSS_AC = {"L": 0.77, "H": 0.44}
+CVSS_PR_U = {"N": 0.85, "L": 0.62, "H": 0.27}
+CVSS_PR_C = {"N": 0.85, "L": 0.68, "H": 0.50}
+CVSS_UI = {"N": 0.85, "R": 0.62}
+CVSS_CIA = {"H": 0.56, "L": 0.22, "N": 0.0}
+
+
+def cvss3_roundup(val: float) -> float:
+    int_input = round(val * 100000)
+    if (int_input % 10000) == 0:
+        return int_input / 100000.0
+    return (math.floor(int_input / 10000) + 1) / 10.0
+
+
+def compute_cvss3_score(vector: str) -> float | None:
+    """Computes numeric 0.0–10.0 Base Score from a CVSS:3.0 / CVSS:3.1 vector string."""
+    if not vector or not vector.startswith("CVSS:3"):
+        return None
+    metrics = {}
+    for part in vector.split("/")[1:]:
+        if ":" in part:
+            k, v = part.split(":", 1)
+            metrics[k] = v
+    try:
+        s = metrics.get("S", "U")
+        av = CVSS_AV[metrics["AV"]]
+        ac = CVSS_AC[metrics["AC"]]
+        pr = (CVSS_PR_C if s == "C" else CVSS_PR_U)[metrics["PR"]]
+        ui = CVSS_UI[metrics["UI"]]
+        c, i, a = CVSS_CIA[metrics["C"]], CVSS_CIA[metrics["I"]], CVSS_CIA[metrics["A"]]
+    except KeyError:
+        return None
+
+    iss = 1.0 - ((1.0 - c) * (1.0 - i) * (1.0 - a))
+    if iss <= 0:
+        return 0.0
+    exploitability = 8.22 * av * ac * pr * ui
+    if s == "U":
+        impact = 6.42 * iss
+        return cvss3_roundup(min(impact + exploitability, 10.0))
+    impact = 7.52 * (iss - 0.029) - 3.25 * ((iss - 0.02) ** 15)
+    return cvss3_roundup(min(1.08 * (impact + exploitability), 10.0))
+
+
+def score_to_severity(score: float | None, fallback: str = "MEDIUM") -> str:
+    if score is None:
+        return fallback.upper()
+    if score >= 9.0:
+        return "CRITICAL"
+    if score >= 7.0:
+        return "HIGH"
+    if score >= 4.0:
+        return "MEDIUM"
+    return "LOW"
+
+
+# --------------------------------------------------------------- parsers
+def parse_requirements(text: str) -> list[tuple[str, str, str]]:
+    deps = []
+    for raw in text.splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if m := REQ_LINE_RE.match(line):
+            deps.append(("PyPI", m.group(1), m.group(2)))
+    return deps
+
+
+def parse_pyproject_toml(text: str) -> list[tuple[str, str, str]]:
+    """Extracts pinned PyPI dependencies from PEP 621 or Poetry pyproject.toml."""
+    deps = []
+    seen = set()
+    skip_keys = {"python", "version", "requires-python", "target-version", "minversion"}
+    # 1. PEP 621 strings like "Flask==0.12.2" or "requests>=2.19.0"
+    for m in re.finditer(r"""["']([A-Za-z0-9_.-]+)(?:\[[^\]]+\])?\s*(?:==|>=|~=|\^)\s*([0-9][A-Za-z0-9_.+-]*)["']""", text):
+        pkg, ver = m.group(1), m.group(2)
+        if pkg.lower() not in skip_keys and (pkg.lower(), ver) not in seen:
+            seen.add((pkg.lower(), ver))
+            deps.append(("PyPI", pkg, ver))
+    # 2. Poetry table lines like: requests = "^2.19.0" or flask = {version = "0.12.2"}
+    for m in re.finditer(r"""^\s*([A-Za-z0-9_.-]+)\s*=\s*(?:["'][\^~>=<]*([0-9][A-Za-z0-9_.+-]*)["']|\{[^}]*version\s*=\s*["'][\^~>=<]*([0-9][A-Za-z0-9_.+-]*)["'])""", text, re.M):
+        pkg = m.group(1)
+        ver = m.group(2) or m.group(3)
+        if pkg.lower() not in skip_keys and (pkg.lower(), ver) not in seen:
+            seen.add((pkg.lower(), ver))
+            deps.append(("PyPI", pkg, ver))
+    return deps
+
+
+def parse_pipfile_lock(text: str) -> list[tuple[str, str, str]]:
+    data = json.loads(text)
+    deps = []
+    for sec in ("default", "develop"):
+        for name, meta in (data.get(sec) or {}).items():
+            ver = str(meta.get("version", "")).lstrip("=")
+            if ver:
+                deps.append(("PyPI", name, ver))
+    return deps
+
+
+def parse_poetry_lock(text: str) -> list[tuple[str, str, str]]:
+    deps = []
+    for block in text.split("[[package]]")[1:]:
+        nm = re.search(r'^\s*name\s*=\s*"([^"]+)"', block, re.M)
+        vm = re.search(r'^\s*version\s*=\s*"([^"]+)"', block, re.M)
+        if nm and vm:
+            deps.append(("PyPI", nm.group(1), vm.group(1)))
+    return deps
+
+
+def parse_package_json(text: str) -> list[tuple[str, str, str]]:
+    data = json.loads(text)
+    deps = []
+    for section in ("dependencies", "devDependencies"):
+        for name, ver in (data.get(section) or {}).items():
+            clean_ver = re.sub(r"^[\^~>=<v\s]+", "", str(ver)).split()[0]
+            if clean_ver and clean_ver[0].isdigit():
+                deps.append(("npm", name, clean_ver))
+    return deps
+
+
+def parse_package_lock_json(text: str) -> list[tuple[str, str, str]]:
+    data = json.loads(text)
+    deps = []
+    seen = set()
+    for pkg_path, meta in (data.get("packages") or {}).items():
+        if not pkg_path or "node_modules/" not in pkg_path:
+            continue
+        name = pkg_path.rsplit("node_modules/", 1)[-1]
+        ver = meta.get("version")
+        if name and ver and (name, ver) not in seen:
+            seen.add((name, ver))
+            deps.append(("npm", name, str(ver)))
+    if not deps:
+        for name, meta in (data.get("dependencies") or {}).items():
+            ver = meta.get("version")
+            if name and ver:
+                deps.append(("npm", name, str(ver)))
+    return deps
+
+
+def read_manifest_text(path: Path) -> str:
+    raw = path.read_bytes()
+    if raw.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return raw.decode("utf-16", errors="ignore")
+    return raw.decode("utf-8-sig", errors="ignore")
+
+
+def parse_manifest_file(path: Path) -> list[tuple[str, str, str]]:
+    name = path.name.lower()
+    text = read_manifest_text(path)
+    if name == "package-lock.json":
+        return parse_package_lock_json(text)
+    if name == "package.json":
+        return parse_package_json(text)
+    if name == "pipfile.lock":
+        return parse_pipfile_lock(text)
+    if name == "poetry.lock":
+        return parse_poetry_lock(text)
+    if name == "pyproject.toml":
+        return parse_pyproject_toml(text)
+    return parse_requirements(text)
+
+
+# ------------------------------------------------------------- OSV API
+def query_osv_batch(deps: list[tuple[str, str, str]]) -> list[list[str]]:
+    payload = {
+        "queries": [
+            {"package": {"name": name, "ecosystem": eco}, "version": ver}
+            for eco, name, ver in deps
+        ]
+    }
+    req = urllib.request.Request(
+        OSV_BATCH_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json", "User-Agent": "CVEDependencyScanner/2.0"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=12) as resp:
+        results = json.loads(resp.read().decode("utf-8")).get("results", [])
+    return [[v["id"] for v in r.get("vulns", [])] for r in results]
+
+
+def fetch_vuln_detail(vuln_id: str) -> dict:
+    req = urllib.request.Request(
+        OSV_VULN_URL.format(vuln_id),
+        headers={"User-Agent": "CVEDependencyScanner/2.0"},
+    )
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        v = json.loads(resp.read().decode("utf-8"))
+
+    aliases = v.get("aliases") or []
+    cve_id = next((a for a in aliases if a.startswith("CVE-")), v.get("id", vuln_id))
+
+    cvss_score = None
+    for sev_item in v.get("severity") or []:
+        score_val = compute_cvss3_score(str(sev_item.get("score", "")))
+        if score_val is not None:
+            cvss_score = score_val
+            break
+
+    raw_sev = (v.get("database_specific") or {}).get("severity")
+    if not raw_sev:
+        for affected in v.get("affected") or []:
+            s = (affected.get("ecosystem_specific") or {}).get("severity")
+            if s:
+                raw_sev = s
+                break
+    severity = score_to_severity(cvss_score, raw_sev or "MEDIUM")
+
+    fixed_in = None
+    for affected in v.get("affected") or []:
+        for rng in affected.get("ranges") or []:
+            for ev in rng.get("events") or []:
+                if "fixed" in ev:
+                    fixed_in = ev["fixed"]
+                    break
+            if fixed_in:
+                break
+        if fixed_in:
+            break
+
+    summary = (v.get("summary") or v.get("details") or "No summary provided").splitlines()[0].strip()
+    return {
+        "id": v.get("id", vuln_id),
+        "cve": cve_id,
+        "cvss_score": cvss_score,
+        "severity": severity,
+        "fixed_in": fixed_in or "see advisory",
+        "summary": summary[:75],
+    }
+
+
+def export_report(report_data: list[dict], source_name: str, output_path: str, upgrade_cmd: str) -> None:
+    out = Path(output_path)
+    ext = out.suffix.lower()
+    if ext == ".sarif":
+        rules = []
+        results = []
+        seen_rules = set()
+        for pkg in report_data:
+            for v in pkg["vulnerabilities"]:
+                rid = v["cve"]
+                if rid not in seen_rules:
+                    seen_rules.add(rid)
+                    rules.append({
+                        "id": rid,
+                        "shortDescription": {"text": v["summary"]},
+                        "properties": {"security-severity": str(v["cvss_score"] or 7.0)},
+                    })
+                results.append({
+                    "ruleId": rid,
+                    "level": "error" if v["severity"] in ("CRITICAL", "HIGH") else "warning",
+                    "message": {
+                        "text": f"{pkg['package']}=={pkg['version']} vulnerable to {rid} (fix: >= {v['fixed_in']})"
+                    },
+                    "locations": [{
+                        "physicalLocation": {
+                            "artifactLocation": {"uri": source_name},
+                            "region": {"startLine": 1},
+                        }
+                    }],
+                })
+        sarif = {
+            "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+            "version": "2.1.0",
+            "runs": [{
+                "tool": {"driver": {"name": "Sonelu CVE Dependency Scanner v2.0", "rules": rules}},
+                "results": results,
+            }],
+        }
+        out.write_text(json.dumps(sarif, indent=2), encoding="utf-8")
+    elif ext in (".md", ".markdown"):
+        lines = [
+            f"# Supply-Chain CVE Audit Report: `{source_name}`",
+            "",
+            "| Package | Installed | CVE ID | CVSS | Severity | Fixed Version |",
+            "|---|---|---|---|---|---|",
+        ]
+        for pkg in report_data:
+            for v in pkg["vulnerabilities"]:
+                sc = f"{v['cvss_score']:.1f}" if v["cvss_score"] is not None else "N/A"
+                lines.append(
+                    f"| `{pkg['package']}` | `{pkg['version']}` | **{v['cve']}** | `{sc}` | `{v['severity']}` | `>={v['fixed_in']}` |"
+                )
+        if upgrade_cmd:
+            lines.extend(["", "## Recommended Remediation Command", f"```bash\n{upgrade_cmd}\n```"])
+        out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    else:
+        out.write_text(
+            json.dumps({"source": source_name, "remediation": upgrade_cmd, "packages": report_data}, indent=2),
+            encoding="utf-8",
+        )
+    print(f"[+] Exported report to {output_path}")
+
+
+# --------------------------------------------------------------- scanner
+def scan_dependencies(deps: list[tuple[str, str, str]], source_name: str, output_path: str | None = None, min_severity: str | None = None) -> int:
+    print(f"[*] Manifest Source : {source_name} ({len(deps)} pinned packages)")
+    print(f"[*] Threat Feed     : Google OSV.dev Batch API + CVSS v3.1 Base Scoring")
+    print("=" * 80)
+
+    try:
+        batch_ids = query_osv_batch(deps)
+    except (urllib.error.URLError, TimeoutError) as e:
+        print(f"[!] Could not reach OSV.dev API: {e}", file=sys.stderr)
+        return 1
+
+    ids_to_fetch = []
+    for vuln_ids in batch_ids:
+        for vid in vuln_ids[:3]:
+            if vid not in ids_to_fetch:
+                ids_to_fetch.append(vid)
+
+    details_map = {}
+    if ids_to_fetch:
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            for vid, info in zip(ids_to_fetch, pool.map(fetch_vuln_detail, ids_to_fetch)):
+                details_map[vid] = info
+
+    vuln_pkg_count = 0
+    total_vulns = 0
+    seen_cves_per_pkg = defaultdict(set)
+    report_data = []
+    pypi_upgrades = []
+    npm_upgrades = []
+
+    for (eco, name, ver), vuln_ids in zip(deps, batch_ids):
+        if not vuln_ids:
+            print(f"  [PASS] {name}=={ver:<10} ({eco}) - 0 known vulnerabilities")
+            report_data.append({"package": name, "version": ver, "ecosystem": eco, "vulnerabilities": []})
+            continue
+
+        vuln_pkg_count += 1
+        sev_ranks = {"LOW": 1, "MEDIUM": 2, "HIGH": 3, "CRITICAL": 4}
+        min_rank = sev_ranks.get(min_severity, 1) if min_severity else 1
+
+        deduped = []
+        fix_candidates = []
+        for vid in vuln_ids[:3]:
+            info = details_map.get(vid)
+            if info and info["cve"] not in seen_cves_per_pkg[name] and len(deduped) < 2:
+                if min_severity and sev_ranks.get(info["severity"], 1) < min_rank:
+                    continue
+                seen_cves_per_pkg[name].add(info["cve"])
+                deduped.append(info)
+                if info["fixed_in"] != "see advisory":
+                    fix_candidates.append(info["fixed_in"])
+
+        deduped.sort(key=lambda x: -(x["cvss_score"] or 5.0))
+        if fix_candidates:
+            best_fix = max(fix_candidates, key=lambda v: [int(n) for n in re.findall(r"\d+", v)])
+            if eco == "PyPI":
+                pypi_upgrades.append(f"{name}>={best_fix}")
+            else:
+                npm_upgrades.append(f"{name}@^{best_fix}")
+
+        total_vulns += len(vuln_ids)
+        print(f"  [VULN] {name}=={ver:<10} ({eco}) - {len(vuln_ids)} advisory(s) found!")
+        for info in deduped:
+            sc_badge = f"CVSS {info['cvss_score']:>4.1f} {info['severity']:<8}" if info["cvss_score"] else f"{info['severity']:<17}"
+            print(f"         ├── {info['cve']:<18} [{sc_badge}] fix: >= {info['fixed_in']:<8} ({info['summary'][:44]})")
+        if len(vuln_ids) > len(deduped):
+            print(f"         └── ... (+{len(vuln_ids) - len(deduped)} more advisories in OSV database)")
+        report_data.append({
+            "package": name,
+            "version": ver,
+            "ecosystem": eco,
+            "total_advisories": len(vuln_ids),
+            "vulnerabilities": deduped,
+        })
+
+    upgrade_cmd = ""
+    if pypi_upgrades:
+        upgrade_cmd = "pip install --upgrade " + " ".join(f'"{u}"' for u in pypi_upgrades)
+    elif npm_upgrades:
+        upgrade_cmd = "npm install " + " ".join(npm_upgrades)
+
+    if upgrade_cmd:
+        print(f"\n  [🔧 Auto-Remediation] {upgrade_cmd}")
+
+    clean_count = len(deps) - vuln_pkg_count
+    verdict = (
+        f"VULNERABLE ({vuln_pkg_count}/{len(deps)} packages affected, {total_vulns} total advisories)"
+        if vuln_pkg_count
+        else "ALL DEPENDENCIES CLEAN"
+    )
+    print("\n" + "=" * 80)
+    print(f"  SUMMARY: {clean_count} clean, {vuln_pkg_count} vulnerable   |   VERDICT: {verdict}")
+    print("=" * 80)
+
+    if output_path:
+        export_report(report_data, source_name, output_path, upgrade_cmd)
+
+    return 2 if vuln_pkg_count else 0
+
+
+def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
+    parser = argparse.ArgumentParser(
+        description="Scan Python & Node.js dependency manifests/lockfiles for known CVEs via OSV.dev."
+    )
+    parser.add_argument(
+        "manifest",
+        nargs="?",
+        help="Path to requirements.txt, pyproject.toml, Pipfile.lock, poetry.lock, package.json, or package-lock.json",
+    )
+    parser.add_argument(
+        "--min-severity",
+        choices=["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+        type=str.upper,
+        help="Filter vulnerabilities by minimum severity (LOW, MEDIUM, HIGH, CRITICAL)",
+    )
+    parser.add_argument("-o", "--output", help="Export report to .json, .sarif (GitHub Code Scanning), or .md")
+    parser.add_argument("--demo", action="store_true", help="Scan a built-in sample requirements.txt")
+    args = parser.parse_args()
+
+    if args.demo:
+        deps = parse_requirements(DEMO_REQUIREMENTS)
+        return scan_dependencies(deps, "built-in demo requirements.txt", args.output, min_severity=args.min_severity)
+
+    if not args.manifest:
+        parser.print_help()
+        print("\n💡 Tip: Run with --demo to scan the built-in sample dependency manifest!")
+        return 0
+
+    path = Path(args.manifest)
+    if not path.is_file():
+        print(f"[!] File not found: {path}", file=sys.stderr)
+        return 1
+
+    deps = parse_manifest_file(path)
+    if not deps:
+        print(f"[!] No pinned dependencies found in {path}.")
+        return 1
+    return scan_dependencies(deps, str(path), args.output, min_severity=args.min_severity)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

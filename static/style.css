@@ -1,0 +1,1012 @@
+/* ==========================================================================
+   🦉 ATHENA-WEB v2.0 - STYLESHEET
+   Mythological Cyber Architecture: Deep Obsidian, Greek Meanders & Dual Wings
+   ========================================================================== */
+
+:root {
+  /* Common Palette */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* 🟣 Hub & Neutral Theme */
+  --bg-dark: #08020e;
+  --bg-gradient: radial-gradient(circle at 50% 0%, #1e072e 0%, #08020e 75%);
+  --bg-card: rgba(22, 7, 36, 0.78);
+  --bg-card-hover: rgba(32, 10, 52, 0.9);
+  --border-subtle: rgba(168, 85, 247, 0.22);
+  --border-glow: rgba(168, 85, 247, 0.45);
+  
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-glow: 0 0 25px rgba(168, 85, 247, 0.35);
+
+  /* 🔴 Red Wing Theme (The Spear) */
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --red-bg: #0d0204;
+  --red-card: rgba(38, 8, 12, 0.8);
+  --red-border: rgba(239, 68, 68, 0.25);
+  --red-glow: 0 0 25px rgba(239, 68, 68, 0.35);
+
+  /* 🔵 Blue Wing Theme (The Aegis Shield) */
+  --blue-400: #38bdf8;
+  --blue-500: #0ea5e9;
+  --blue-600: #0284c7;
+  --blue-bg: #020713;
+  --blue-card: rgba(6, 18, 38, 0.8);
+  --blue-border: rgba(56, 189, 248, 0.25);
+  --blue-glow: 0 0 25px rgba(56, 189, 248, 0.35);
+
+  /* Typography Colors */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dark: #64748b;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+}
+
+/* ------------------------------------------------ Reset & Base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------ 🏛️ Greek Meander Watermark */
+.meander-canvas {
+  position: relative;
+  min-height: 100vh;
+  background: var(--bg-gradient);
+}
+
+.meander-canvas::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("/static/meander-wallpaper-purple.svg?v=20261029k");
+  background-repeat: repeat;
+  background-size: 120px 240px; /* Exact smaller crisp scale */
+  opacity: 0.085; /* Clearly visible, elegant Greek meander watermark */
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Red Wing Meander Tint */
+.meander-canvas.red-wing::before {
+  background-image: url("/static/meander-wallpaper-red.svg?v=20261029k");
+  background-size: 120px 240px;
+  filter: none;
+  opacity: 0.09;
+}
+
+/* Blue Wing Meander Tint */
+.meander-canvas.blue-wing::before {
+  background-image: url("/static/meander-wallpaper-blue.svg?v=20261029k");
+  background-size: 120px 240px;
+  filter: none;
+  opacity: 0.09;
+}
+
+/* ------------------------------------------------ 🏛️ Greek Meander Ribbon Divider */
+.meander-ribbon {
+  height: 48px;
+  width: 100%;
+  background-image: url("/static/meander-purple.svg");
+  background-repeat: repeat-x;
+  background-size: auto 48px;
+  background-position: center;
+  opacity: 0.75;
+  margin: 1.5rem 0;
+}
+
+/* ------------------------------------------------ 🖼️ Logo Placeholders (to be replaced by real logos) */
+.logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border-glow);
+  border-radius: var(--radius-sm);
+  color: var(--text-dark);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.02);
+}
+.logo-placeholder.brand { width: 42px; height: 42px; font-size: 0.6rem; }
+.logo-placeholder.hero { width: 420px; max-width: 100%; height: 130px; margin: 0 auto 1rem auto; }
+.logo-placeholder.portal { width: 100%; height: 90px; margin-bottom: 0.75rem; }
+.red-portal .logo-placeholder { border-color: var(--red-border); }
+.blue-portal .logo-placeholder { border-color: var(--blue-border); }
+
+/* ------------------------------------------------ 🖼️ Brand & Hero Logos */
+.brand-logo-img {
+  height: 42px;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.5));
+}
+.red-wing .brand-logo-img {
+  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.55));
+}
+.blue-wing .brand-logo-img {
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.55));
+}
+
+.hero-logo-img {
+  width: min(720px, 92vw);
+  height: auto;
+  aspect-ratio: 1920 / 1000;
+  object-fit: contain;
+  margin: 1rem auto 1.75rem auto;
+  display: block;
+  filter: drop-shadow(0 0 32px rgba(168, 85, 247, 0.45));
+  transition: transform 0.3s ease;
+}
+.hero-logo-img:hover {
+  transform: scale(1.02);
+}
+.red-wing .hero-logo-img {
+  filter: drop-shadow(0 0 32px rgba(239, 68, 68, 0.45));
+}
+.blue-wing .hero-logo-img {
+  filter: drop-shadow(0 0 32px rgba(56, 189, 248, 0.45));
+}
+
+.portal-logo-img {
+  width: 90%;
+  max-width: 340px;
+  height: auto;
+  aspect-ratio: 1920 / 1000;
+  object-fit: contain;
+  margin: 0.5rem auto 1.5rem auto;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.portal-card:hover .portal-logo-img {
+  transform: scale(1.05);
+}
+.red-portal .portal-logo-img {
+  filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.4));
+}
+.blue-portal .portal-logo-img {
+  filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.4));
+}
+
+.meander-ribbon.purple { background-image: url("/static/meander-purple.svg"); opacity: 0.75; filter: none; }
+.meander-ribbon.red { background-image: url("/static/meander-red.svg"); opacity: 0.8; filter: none; }
+.meander-ribbon.blue { background-image: url("/static/meander-blue.svg"); opacity: 0.8; filter: none; }
+
+/* ------------------------------------------------ Layout Containers */
+.container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* ------------------------------------------------ Navigation Header */
+header.site-header {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(8, 2, 14, 0.75);
+}
+
+.nav-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: var(--text-main);
+}
+
+.brand-logo-owl {
+  width: 38px;
+  height: 38px;
+  fill: var(--purple-400);
+  filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.6));
+}
+
+.brand-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #f8fafc 30%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-greek-sub {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: var(--purple-400);
+  text-transform: uppercase;
+  margin-top: -3px;
+}
+
+.nav-pills {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-size: 0.78rem;
+  color: #34d399;
+  font-family: var(--font-mono);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.nav-link-btn {
+  text-decoration: none;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.nav-link-btn.btn-hub {
+  color: var(--purple-400);
+  border-color: var(--border-subtle);
+}
+.nav-link-btn.btn-hub:hover {
+  background: rgba(168, 85, 247, 0.15);
+}
+
+.nav-link-btn.btn-red {
+  color: var(--red-400);
+  border-color: var(--red-border);
+}
+.nav-link-btn.btn-red:hover {
+  background: rgba(239, 68, 68, 0.15);
+  box-shadow: var(--red-glow);
+}
+
+.nav-link-btn.btn-blue {
+  color: var(--blue-400);
+  border-color: var(--blue-border);
+}
+.nav-link-btn.btn-blue:hover {
+  background: rgba(56, 189, 248, 0.15);
+  box-shadow: var(--blue-glow);
+}
+
+/* ------------------------------------------------ 🟣 Hero Section (Hub) */
+.hero-hub {
+  padding: 3.5rem 0 2rem 0;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--purple-400);
+  padding: 0.35rem 1rem;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9999px;
+  margin-bottom: 1.25rem;
+}
+
+.hero-title {
+  font-size: 3.4rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 0 35px rgba(168, 85, 247, 0.35);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  max-width: 680px;
+  margin: 0 auto 2rem auto;
+}
+
+/* Metrics Ribbon */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin: 2rem 0 3.5rem 0;
+}
+
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  padding: 1.25rem 1rem;
+  border-radius: var(--radius-md);
+  text-align: center;
+  backdrop-filter: blur(8px);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--purple-400);
+}
+
+.metric-number {
+  font-size: 1.8rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--purple-400);
+  margin-bottom: 0.2rem;
+}
+
+.metric-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ------------------------------------------------ 🚪 Dual Wing Hero Split Cards */
+.split-portals-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.portal-card {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  text-decoration: none;
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.portal-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+/* 🔴 Offensive Wing Card */
+.portal-card.red-portal {
+  border-color: var(--red-border);
+  background: linear-gradient(170deg, rgba(38, 8, 12, 0.75) 0%, rgba(14, 3, 5, 0.85) 100%);
+}
+.portal-card.red-portal::before {
+  background: linear-gradient(90deg, #ef4444, #f87171, #ef4444);
+}
+.portal-card.red-portal:hover {
+  transform: translateY(-6px);
+  border-color: var(--red-500);
+  box-shadow: 0 16px 40px rgba(239, 68, 68, 0.25);
+}
+
+/* 🔵 Defensive Wing Card */
+.portal-card.blue-portal {
+  border-color: var(--blue-border);
+  background: linear-gradient(170deg, rgba(6, 18, 38, 0.75) 0%, rgba(2, 7, 18, 0.85) 100%);
+}
+.portal-card.blue-portal::before {
+  background: linear-gradient(90deg, #0ea5e9, #38bdf8, #0ea5e9);
+}
+.portal-card.blue-portal:hover {
+  transform: translateY(-6px);
+  border-color: var(--blue-500);
+  box-shadow: 0 16px 40px rgba(56, 189, 248, 0.25);
+}
+
+.portal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.portal-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+}
+
+.red-portal .portal-tag {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--red-400);
+  border: 1px solid var(--red-border);
+}
+
+.blue-portal .portal-tag {
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--blue-400);
+  border: 1px solid var(--blue-border);
+}
+
+.portal-icon-svg {
+  width: 48px;
+  height: 48px;
+}
+
+.portal-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.portal-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Tool Badges List inside Cards */
+.tools-badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.tool-chip {
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+}
+
+.red-portal .tool-chip:hover {
+  border-color: var(--red-400);
+  color: var(--red-400);
+}
+
+.blue-portal .tool-chip:hover {
+  border-color: var(--blue-400);
+  color: var(--blue-400);
+}
+
+.portal-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.red-portal .portal-action-btn {
+  background: linear-gradient(135deg, var(--red-600) 0%, var(--red-500) 100%);
+  color: white;
+}
+.red-portal:hover .portal-action-btn {
+  background: linear-gradient(135deg, var(--red-500) 0%, var(--red-400) 100%);
+}
+
+.blue-portal .portal-action-btn {
+  background: linear-gradient(135deg, var(--blue-600) 0%, var(--blue-500) 100%);
+  color: white;
+}
+.blue-portal:hover .portal-action-btn {
+  background: linear-gradient(135deg, var(--blue-500) 0%, var(--blue-400) 100%);
+}
+
+/* ------------------------------------------------ ⚖️ Footer & Legal */
+footer.site-footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: 3rem 0;
+  background: rgba(4, 1, 8, 0.85);
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.footer-legal-box {
+  background: rgba(22, 7, 36, 0.5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.footer-legal-title {
+  color: var(--purple-400);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: var(--text-dark);
+}
+
+/* ------------------------------------------------ Responsive */
+@media (max-width: 900px) {
+  .split-portals-grid { grid-template-columns: 1fr; }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-title { font-size: 2.5rem; }
+}
+
+@media (max-width: 600px) {
+  .metrics-grid { grid-template-columns: 1fr; }
+  .nav-pills .status-pill { display: none; }
+}
+
+
+/* ==========================================================================
+   🎮 CONSOLE, TERMINAL & TOOL EXECUTION STYLES (Red & Blue Wings)
+   ========================================================================== */
+
+/* Console Layout Grid: Left Tools (56%) | Right Live Terminal (44%) */
+.console-layout {
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  gap: 1.75rem;
+  align-items: start;
+  margin-bottom: 3.5rem;
+}
+
+@media (max-width: 1050px) {
+  .console-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tool Execution Cards Stack */
+.tools-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.tool-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+}
+
+.red-wing .tool-card {
+  background: linear-gradient(170deg, rgba(28, 6, 10, 0.82) 0%, rgba(14, 3, 5, 0.9) 100%);
+  border-color: var(--red-border);
+}
+.red-wing .tool-card:hover {
+  border-color: var(--red-500);
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.18);
+}
+
+.blue-wing .tool-card {
+  background: linear-gradient(170deg, rgba(6, 16, 32, 0.82) 0%, rgba(2, 7, 18, 0.9) 100%);
+  border-color: var(--blue-border);
+}
+.blue-wing .tool-card:hover {
+  border-color: var(--blue-500);
+  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.18);
+}
+
+.tool-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.45rem;
+}
+
+.tool-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tool-key-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+}
+
+.tool-card-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.45;
+}
+
+/* Tool Input & Action Controls */
+.tool-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: nowrap; /* Keep all tool controls and Demo on a single clean line */
+}
+
+@media (max-width: 768px) {
+  .tool-controls {
+    flex-wrap: wrap;
+  }
+}
+
+.tool-input {
+  flex: 1 1 auto;
+  min-width: 90px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.red-wing .tool-input:focus {
+  border-color: var(--red-400);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+}
+.blue-wing .tool-input:focus {
+  border-color: var(--blue-400);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.btn-exec {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.red-wing .btn-exec {
+  background: linear-gradient(135deg, var(--red-600) 0%, var(--red-500) 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.35);
+}
+.red-wing .btn-exec:hover {
+  background: linear-gradient(135deg, var(--red-500) 0%, var(--red-400) 100%);
+  transform: translateY(-1px);
+}
+.blue-wing .btn-exec {
+  background: linear-gradient(135deg, var(--blue-600) 0%, var(--blue-500) 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.35);
+}
+.blue-wing .btn-exec:hover {
+  background: linear-gradient(135deg, var(--blue-500) 0%, var(--blue-400) 100%);
+  transform: translateY(-1px);
+}
+
+.btn-demo {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-demo:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+}
+
+/* 📁 File Upload Button & Status Pill */
+.btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  color: var(--text-main);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.red-wing .btn-upload {
+  border-color: var(--red-border);
+}
+.red-wing .btn-upload:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: var(--red-400);
+}
+.blue-wing .btn-upload {
+  border-color: var(--blue-border);
+}
+.blue-wing .btn-upload:hover {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: var(--blue-400);
+}
+
+.file-status-pill {
+  flex: 1 1 auto;
+  min-width: 90px;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-status-pill.ready {
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.08);
+}
+.file-status-pill.uploading {
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #facc15;
+  background: rgba(234, 179, 8, 0.08);
+}
+.file-status-pill.failed {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* 💻 Terminal Console Panel */
+.terminal-panel {
+  position: sticky;
+  top: 5.5rem;
+  background: #030107;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+.red-wing .terminal-panel {
+  border-color: var(--red-border);
+  box-shadow: 0 10px 35px rgba(239, 68, 68, 0.15);
+}
+
+.blue-wing .terminal-panel {
+  border-color: var(--blue-border);
+  box-shadow: 0 10px 35px rgba(56, 189, 248, 0.15);
+}
+
+.terminal-header {
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.8rem 1.15rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.25rem;
+  min-height: 46px;
+}
+
+.terminal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem; /* Generous breathing room so text never touches the green dot */
+  min-width: 0;
+  flex: 1;
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.terminal-dot.close { background: #ef4444; }
+.terminal-dot.min { background: #eab308; }
+.terminal-dot.max { background: #22c55e; }
+
+.terminal-title {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.terminal-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.terminal-badge.running {
+  background: rgba(234, 179, 8, 0.18);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  animation: pulse-dot 1.5s infinite ease-in-out;
+}
+.terminal-badge.completed {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.terminal-badge.failed {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.terminal-body {
+  padding: 1.25rem;
+  min-height: 480px;
+  max-height: 640px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #e2e8f0;
+  background: #020104;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.terminal-footer {
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.65rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.terminal-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.terminal-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+}
+
+/* File Upload Dropzone (Defensive Wing) */
+.dropzone-box {
+  background: rgba(6, 18, 38, 0.5);
+  border: 2px dashed var(--blue-border);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.dropzone-box:hover, .dropzone-box.dragover {
+  border-color: var(--blue-400);
+  background: rgba(6, 18, 38, 0.85);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+}
+.dropzone-icon {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+.dropzone-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.dropzone-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}

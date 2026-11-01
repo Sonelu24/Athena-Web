@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athena | Defensive</title>
+  <link rel="stylesheet" href="/static/style.css?v=20261029k">
+</head>
+<body class="meander-canvas blue-wing">
+
+  <!-- 🏛️ Top Navigation Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="/" class="brand-link">
+        <img src="/logos/athena%20blue.png" alt="Athena Logo" class="brand-logo-img">
+        <div>
+          <div class="brand-title">ATHENA</div>
+          <div class="brand-greek-sub" style="color: var(--blue-400);">DEFENSIVE WING</div>
+        </div>
+      </a>
+
+      <div class="nav-pills">
+        <div class="status-pill" style="border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.1); color: var(--blue-400);">
+          <span class="status-dot" style="background: #38bdf8; box-shadow: 0 0 8px #38bdf8;"></span>
+          <span id="server-status-label">Localhost 127.0.0.1:8080</span>
+        </div>
+        <a href="/" class="nav-link-btn btn-hub">🟣 The Hub</a>
+        <a href="/red" class="nav-link-btn btn-red">🔴 Offensive Wing</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 🏛️ Greek Meander Ribbon Divider -->
+  <div class="meander-ribbon blue"></div>
+
+  <!-- 🔵 Main Console Content -->
+  <main class="container">
+    <section class="hero-hub" style="padding: 2rem 0 1.5rem 0;">
+      <div class="hero-badge" style="color: var(--blue-400); background: rgba(56, 189, 248, 0.12); border-color: var(--blue-border);">
+        THE AEGIS SHIELD • FORENSIC INCIDENT RESPONSE & THREAT HUNTING
+      </div>
+      <img src="/logos/athena%20blue.png" alt="Athena Defensive Wing - The Aegis Shield" class="hero-logo-img">
+      <p class="hero-subtitle">
+        Triaging suspicious artifacts, detecting brute-force attempts in SSH logs, verifying file integrity baselines, dissecting phishing headers, inspecting raw PCAP captures, and defanging threat indicators.
+      </p>
+    </section>
+
+    <!-- 🎮 Two-Column Layout: Tools on Left, Sticky Terminal on Right -->
+    <div class="console-layout">
+
+      <!-- Left Column: 7 Blue Team Tool Cards -->
+      <div class="tools-stack">
+
+        <!-- Tool 1: SSH Auth Log Analyzer -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">🔐 SSH Auth Log Analyzer</span>
+            <span class="tool-key-badge">ssh</span>
+          </div>
+          <div class="tool-card-desc">
+            Parse Linux `/var/log/auth.log` or syslog, detect password spraying, dictionary brute-force attacks, invalid user attempts, and attacker IP distribution.
+          </div>
+          <div class="tool-controls">
+            <input type="file" id="file-ssh" accept=".log,.txt,auth.log,syslog,secure" style="display: none;" onchange="uploadToolFile('ssh', this.files[0])">
+            <button type="button" class="btn-upload" onclick="document.getElementById('file-ssh').click()">📁 Upload Log</button>
+            <input type="hidden" id="input-ssh" value="auth.log">
+            <div id="status-ssh" class="file-status-pill">auth.log (default sample)</div>
+            <button class="btn-exec" onclick="runTool('ssh', [document.getElementById('input-ssh').value])">▶ Analyze Log</button>
+            <button class="btn-demo" onclick="runTool('ssh', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 2: File Integrity Monitor (FIM) -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">🛡️ File Integrity Monitor (FIM)</span>
+            <span class="tool-key-badge">fim</span>
+          </div>
+          <div class="tool-card-desc">
+            Establish SHA-256 baseline snapshots across critical system directories and verify changes to detect unauthorized tampering or backdoors.
+          </div>
+          <div class="tool-controls">
+            <input type="file" id="file-fim" accept=".json,.txt,.db,.baseline,.hash" style="display: none;" onchange="uploadToolFile('fim', this.files[0])">
+            <button type="button" class="btn-upload" onclick="document.getElementById('file-fim').click()">📁 Upload Baseline</button>
+            <input type="text" id="input-fim" class="tool-input" placeholder="verify or target folder" value="verify">
+            <div id="status-fim" class="file-status-pill" style="display: none;"></div>
+            <button class="btn-exec" onclick="runTool('fim', [document.getElementById('input-fim').value])">▶ Run Check</button>
+            <button class="btn-demo" onclick="runTool('fim', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 3: Phishing Email Analyzer -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">📧 Phishing Email Analyzer</span>
+            <span class="tool-key-badge">phishing</span>
+          </div>
+          <div class="tool-card-desc">
+            Dissect `.eml` / RFC 822 email files, verify SPF/DKIM/DMARC authentication hops, score urgency keywords, and flag lookalike sender domains.
+          </div>
+          <div class="tool-controls">
+            <input type="file" id="file-phishing" accept=".eml,.msg,.mbox,.txt" style="display: none;" onchange="uploadToolFile('phishing', this.files[0])">
+            <button type="button" class="btn-upload" onclick="document.getElementById('file-phishing').click()">📁 Upload EML</button>
+            <input type="hidden" id="input-phishing" value="sample_phish.eml">
+            <div id="status-phishing" class="file-status-pill">sample_phish.eml (default sample)</div>
+            <button class="btn-exec" onclick="runTool('phishing', [document.getElementById('input-phishing').value])">▶ Analyze EML</button>
+            <button class="btn-demo" onclick="runTool('phishing', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 4: PCAP Threat Hunter -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">🦈 PCAP Threat Hunter</span>
+            <span class="tool-key-badge">pcap</span>
+          </div>
+          <div class="tool-card-desc">
+            Pure-Python PCAP binary stream parser (zero Scapy/Wireshark required): inspect TCP/UDP packets, extract DNS queries, and detect C2 beaconing.
+          </div>
+          <div class="tool-controls">
+            <input type="file" id="file-pcap" accept=".pcap,.pcapng,.cap" style="display: none;" onchange="uploadToolFile('pcap', this.files[0])">
+            <button type="button" class="btn-upload" onclick="document.getElementById('file-pcap').click()">📁 Upload PCAP</button>
+            <input type="hidden" id="input-pcap" value="capture.pcap">
+            <div id="status-pcap" class="file-status-pill">capture.pcap (default sample)</div>
+            <button class="btn-exec" onclick="runTool('pcap', [document.getElementById('input-pcap').value])">▶ Hunt PCAP</button>
+            <button class="btn-demo" onclick="runTool('pcap', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 5: Malware Binary Triage -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">🔬 Malware Binary Triage</span>
+            <span class="tool-key-badge">malware</span>
+          </div>
+          <div class="tool-card-desc">
+            Static forensic examination: compute Shannon entropy to detect packed/encrypted payloads, extract suspicious ASCII/Unicode strings, and inspect PE headers.
+          </div>
+          <div class="tool-controls">
+            <input type="file" id="file-malware" accept=".exe,.dll,.sys,.elf,.bin,.so,.sh,.ps1,.bat,.cmd,.vbs,.py" style="display: none;" onchange="uploadToolFile('malware', this.files[0])">
+            <button type="button" class="btn-upload" onclick="document.getElementById('file-malware').click()">📁 Upload Binary</button>
+            <input type="hidden" id="input-malware" value="sample.exe">
+            <div id="status-malware" class="file-status-pill">sample.exe (default sample)</div>
+            <button class="btn-exec" onclick="runTool('malware', [document.getElementById('input-malware').value])">▶ Triage Binary</button>
+            <button class="btn-demo" onclick="runTool('malware', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 6: IOC Threat Extractor & Defanger -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">🎯 IOC Extractor & Defanger</span>
+            <span class="tool-key-badge">ioc</span>
+          </div>
+          <div class="tool-card-desc">
+            Extract IPv4/IPv6 addresses, domains, URLs, CVE numbers, and MD5/SHA256 hashes from incident tickets or files, and defang them for safe documentation.
+          </div>
+          <div class="tool-controls">
+            <input type="file" id="file-ioc" accept=".txt,.log,.csv,.json,.eml,.md" style="display: none;" onchange="uploadToolFile('ioc', this.files[0])">
+            <button type="button" class="btn-upload" onclick="document.getElementById('file-ioc').click()">📁 Upload File</button>
+            <input type="text" id="input-ioc" class="tool-input" placeholder="incident text or uploaded file" value="Found C2 at hxxp://evil-domain.com/beacon and IP 198.51.100.23 with sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855">
+            <div id="status-ioc" class="file-status-pill" style="display: none;"></div>
+            <button class="btn-exec" onclick="runTool('ioc', [document.getElementById('input-ioc').value])">▶ Extract IOCs</button>
+            <button class="btn-demo" onclick="runTool('ioc', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 7: PHP2Shell Webroot Detector -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">🕵️ PHP2Shell Webshell Detector</span>
+            <span class="tool-key-badge">php2shell-detect</span>
+          </div>
+          <div class="tool-card-desc">
+            Recursively inspect web directory structures and web server access logs for webshell signatures (c99, r57, b374k, system, passthru, eval base64).
+          </div>
+          <div class="tool-controls">
+            <input type="file" id="file-php2shell-detect" accept=".log,.txt,.php,.phtml,.php3,.php4,.php5,.htaccess" style="display: none;" onchange="uploadToolFile('php2shell-detect', this.files[0])">
+            <button type="button" class="btn-upload" onclick="document.getElementById('file-php2shell-detect').click()">📁 Upload Log</button>
+            <input type="hidden" id="input-php2shell-detect" value="access.log">
+            <div id="status-php2shell-detect" class="file-status-pill">access.log (default sample)</div>
+            <button class="btn-exec" onclick="runTool('php2shell-detect', [document.getElementById('input-php2shell-detect').value])">▶ Detect Shells</button>
+            <button class="btn-demo" onclick="runTool('php2shell-detect', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Sticky Live Output Terminal -->
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          <div class="terminal-header-left">
+            <div class="terminal-dots">
+              <span class="terminal-dot close"></span>
+              <span class="terminal-dot min"></span>
+              <span class="terminal-dot max"></span>
+            </div>
+            <span class="terminal-title">ATHENA BLUE CONSOLE // INCIDENT RESPONSE</span>
+          </div>
+          <span id="job-status-badge" class="terminal-badge">IDLE</span>
+        </div>
+
+        <pre id="terminal-body" class="terminal-body">
+[*] Athena Defensive Wing Initialized.
+[*] Zero external dependencies • 100% Python Standard Library.
+[*] Upload an artifact directly to any tool card or click [Demo] to run an automated triage.
+        </pre>
+
+        <div class="terminal-footer">
+          <span id="job-id-label" style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dark);">JOB: none</span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="terminal-btn" onclick="copyTerminal()">📋 Copy</button>
+            <button class="terminal-btn" onclick="clearTerminal()">🧹 Clear</button>
+            <button class="terminal-btn" onclick="downloadReport()">💾 Download .txt</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 🏛️ Greek Meander Ribbon Divider -->
+  <div class="meander-ribbon blue"></div>
+
+  <!-- ⚖️ Legal & Ethical Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-legal-box" style="border-color: var(--blue-border); background: rgba(6, 18, 38, 0.5);">
+        <div class="footer-legal-title" style="color: var(--blue-400);">
+          <span>⚖️</span>
+          <span>LEGAL & ETHICAL DISCLAIMER - FORENSIC & INCIDENT RESPONSE COMPLIANCE</span>
+        </div>
+        <p>
+          The Aegis Shield defensive modules are designed strictly for authorized incident response, internal telemetry auditing, malware forensics, and SOC operations. Handled forensic artifacts (logs, memory dumps, PCAPs) remain strictly contained inside your air-gapped localhost sandbox and are never forwarded across public networks.
+        </p>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 Alexandru Iosif Mocanu (Sonelu). All rights reserved. Distributed under the MIT License.</div>
+        <div>Athena Purple Team Suite v2.0 • Defensive Wing</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Asynchronous Execution & Terminal Poller JS -->
+  <script>
+    let activeJobId = null;
+    let pollInterval = null;
+
+    async function runTool(toolKey, args) {
+      const term = document.getElementById("terminal-body");
+      const badge = document.getElementById("job-status-badge");
+      const jobLabel = document.getElementById("job-id-label");
+
+      term.textContent = `[*] Launching ${toolKey} with args: ${JSON.stringify(args)}...\n[*] Contacting Athena localhost API (POST /api/run)...\n`;
+      badge.textContent = "RUNNING";
+      badge.className = "terminal-badge running";
+
+      if (pollInterval) clearInterval(pollInterval);
+
+      try {
+        const res = await fetch("/api/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tool: toolKey, args: args })
+        });
+        const data = await res.json();
+        if (data.error) {
+          term.textContent += `[!] Error: ${data.error}\n`;
+          badge.textContent = "FAILED";
+          badge.className = "terminal-badge failed";
+          return;
+        }
+
+        activeJobId = data.job_id;
+        jobLabel.textContent = `JOB: ${activeJobId.substring(0, 8)}`;
+
+        pollInterval = setInterval(async () => {
+          try {
+            const jRes = await fetch(`/api/job/${activeJobId}`);
+            if (!jRes.ok) return;
+            const job = await jRes.json();
+            term.textContent = job.output || "[*] Running...";
+            term.scrollTop = term.scrollHeight;
+
+            if (job.status === "completed") {
+              clearInterval(pollInterval);
+              badge.textContent = `COMPLETED (exit ${job.exit_code})`;
+              badge.className = job.exit_code === 0 ? "terminal-badge completed" : "terminal-badge failed";
+            } else if (job.status === "failed") {
+              clearInterval(pollInterval);
+              badge.textContent = "FAILED";
+              badge.className = "terminal-badge failed";
+            }
+          } catch (e) {
+            console.error("Poll error:", e);
+          }
+        }, 350);
+
+      } catch (err) {
+        term.textContent += `[!] Network/Execution failure: ${err.message}\n`;
+        badge.textContent = "FAILED";
+        badge.className = "terminal-badge failed";
+      }
+    }
+
+    function clearTerminal() {
+      document.getElementById("terminal-body").textContent = "[*] Console cleared. Ready for next operation.\n";
+      const badge = document.getElementById("job-status-badge");
+      badge.textContent = "IDLE";
+      badge.className = "terminal-badge";
+      document.getElementById("job-id-label").textContent = "JOB: none";
+    }
+
+    function copyTerminal() {
+      const text = document.getElementById("terminal-body").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Terminal log copied to clipboard!");
+      });
+    }
+
+    function downloadReport() {
+      const text = document.getElementById("terminal-body").textContent;
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `athena-defensive-report-${Date.now()}.txt`;
+      a.click();
+    }
+
+    const ALLOWED_EXTENSIONS = {
+      ssh: [".log", ".txt", "auth.log", "syslog", "secure"],
+      fim: [".json", ".txt", ".db", ".baseline", ".hash"],
+      phishing: [".eml", ".msg", ".mbox", ".txt"],
+      pcap: [".pcap", ".pcapng", ".cap"],
+      malware: [".exe", ".dll", ".sys", ".elf", ".bin", ".so", ".sh", ".ps1", ".bat", ".cmd", ".vbs", ".py", ".apk", ".msi", ".scr", ".com"],
+      ioc: [".txt", ".log", ".csv", ".json", ".eml", ".md"],
+      "php2shell-detect": [".log", ".txt", ".php", ".phtml", ".php3", ".php4", ".php5", ".htaccess"]
+    };
+
+    async function uploadToolFile(toolKey, file) {
+      if (!file) return;
+      const pill = document.getElementById(`status-${toolKey}`);
+      const hidden = document.getElementById(`input-${toolKey}`);
+      const fileInput = document.getElementById(`file-${toolKey}`);
+
+      const fileName = file.name.toLowerCase();
+      const allowed = ALLOWED_EXTENSIONS[toolKey] || [];
+      const isValid = allowed.some(ext => {
+        if (ext.startsWith(".")) return fileName.endsWith(ext);
+        return fileName === ext || fileName.endsWith("/" + ext) || fileName.endsWith("\\" + ext);
+      });
+
+      if (!isValid) {
+        if (pill) {
+          pill.style.display = "flex";
+          pill.className = "file-status-pill failed";
+          pill.textContent = `❌ Rejected: '${file.name}' invalid (allowed: ${allowed.join(", ")})`;
+        }
+        if (fileInput) fileInput.value = "";
+        return;
+      }
+
+      if (pill) {
+        pill.style.display = "flex";
+        pill.className = "file-status-pill uploading";
+        pill.textContent = `⏳ Uploading ${file.name}...`;
+      }
+
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("tool", toolKey);
+
+      try {
+        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        const data = await res.json();
+        const serverPath = data.server_path || data.path;
+        if (res.ok && data.status === "success" && serverPath) {
+          if (hidden) hidden.value = serverPath;
+          if (pill) {
+            pill.className = "file-status-pill ready";
+            const kb = Math.round(data.size_bytes / 1024);
+            pill.textContent = `✓ ${file.name} (${kb} KB)`;
+          }
+        } else {
+          if (pill) {
+            pill.className = "file-status-pill failed";
+            pill.textContent = `❌ ${data.error || "Upload rejected"}`;
+          }
+          if (fileInput) fileInput.value = "";
+        }
+      } catch (err) {
+        if (pill) {
+          pill.className = "file-status-pill failed";
+          pill.textContent = `❌ Error: ${err.message}`;
+        }
+        if (fileInput) fileInput.value = "";
+      }
+    }
+  </script>
+</body>
+</html>

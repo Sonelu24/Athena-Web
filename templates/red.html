@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Athena | Offensive</title>
+  <link rel="stylesheet" href="/static/style.css?v=20261029k">
+</head>
+<body class="meander-canvas red-wing">
+
+  <!-- 🏛️ Top Navigation Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="/" class="brand-link">
+        <img src="/logos/athena%20red.png" alt="Athena Logo" class="brand-logo-img">
+        <div>
+          <div class="brand-title">ATHENA</div>
+          <div class="brand-greek-sub" style="color: var(--red-400);">OFFENSIVE WING</div>
+        </div>
+      </a>
+
+      <div class="nav-pills">
+        <div class="status-pill" style="border-color: rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.1); color: var(--red-400);">
+          <span class="status-dot" style="background: #ef4444; box-shadow: 0 0 8px #ef4444;"></span>
+          <span id="server-status-label">Localhost 127.0.0.1:8080</span>
+        </div>
+        <a href="/" class="nav-link-btn btn-hub">🟣 The Hub</a>
+        <a href="/blue" class="nav-link-btn btn-blue">🔵 Defensive Wing</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 🏛️ Greek Meander Ribbon Divider -->
+  <div class="meander-ribbon red"></div>
+
+  <!-- 🔴 Main Console Content -->
+  <main class="container">
+    <section class="hero-hub" style="padding: 2rem 0 1.5rem 0;">
+      <div class="hero-badge" style="color: var(--red-400); background: rgba(239, 68, 68, 0.12); border-color: var(--red-border);">
+        THE SPEAR • ATTACK SURFACE & VULNERABILITY RECONNAISSANCE
+      </div>
+      <img src="/logos/athena%20red.png" alt="Athena Offensive Wing - The Spear" class="hero-logo-img">
+      <p class="hero-subtitle">
+        Execute active and passive reconnaissance, discover hidden endpoints, audit security headers, test for exposed credentials, scan dependencies for CVEs, and inspect cryptographic posture.
+      </p>
+    </section>
+
+    <!-- 🎮 Two-Column Layout: Tools on Left, Sticky Terminal on Right -->
+    <div class="console-layout">
+
+      <!-- Left Column: 7 Red Team Tool Cards -->
+      <div class="tools-stack">
+
+        <!-- Tool 1: Attack Surface Mapper -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">🌐 Attack Surface Mapper</span>
+            <span class="tool-key-badge">mapper</span>
+          </div>
+          <div class="tool-card-desc">
+            Crawl target web roots, extract hyperlinks, scripts, robots.txt, sitemap.xml, and discover hidden endpoints and sensitive files.
+          </div>
+          <div class="tool-controls">
+            <input type="text" id="input-mapper" class="tool-input" placeholder="https://example.com" value="https://example.com">
+            <button class="btn-exec" onclick="runTool('map', [document.getElementById('input-mapper').value])">▶ Run Scan</button>
+            <button class="btn-demo" onclick="runTool('map', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 2: Security Header Scanner -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">🛡️ Security Header Scanner</span>
+            <span class="tool-key-badge">headers</span>
+          </div>
+          <div class="tool-card-desc">
+            Audit HTTP security headers (HSTS, CSP, X-Frame-Options, CORS wildcards) and compute an automated security letter grade (A+ to F).
+          </div>
+          <div class="tool-controls">
+            <input type="text" id="input-headers" class="tool-input" placeholder="https://example.com" value="https://example.com">
+            <button class="btn-exec" onclick="runTool('headers', [document.getElementById('input-headers').value])">▶ Audit Headers</button>
+            <button class="btn-demo" onclick="runTool('headers', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 3: Password Breach Checker -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">🔑 Password Breach Checker</span>
+            <span class="tool-key-badge">breach</span>
+          </div>
+          <div class="tool-card-desc">
+            Query HaveIBeenPwned 800M+ exposed passwords securely using NIST-compliant k-Anonymity SHA-1 hash prefixes (zero plain-text transmission).
+          </div>
+          <div class="tool-controls">
+            <input type="password" id="input-breach" class="tool-input" placeholder="Enter password to check" value="P@ssw0rd2026">
+            <button class="btn-exec" onclick="runTool('breach', [document.getElementById('input-breach').value])">▶ Check Breach</button>
+            <button class="btn-demo" onclick="runTool('breach', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 4: CVE Dependency Scanner -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">📦 CVE Dependency Scanner</span>
+            <span class="tool-key-badge">cve</span>
+          </div>
+          <div class="tool-card-desc">
+            Parse software dependency manifests (requirements.txt, package.json) and query OSV.dev and NIST NVD for known CVE vulnerabilities.
+          </div>
+          <div class="tool-controls">
+            <input type="file" id="file-cve" accept=".txt,.json,.xml,.lock,.toml,.pip,.req" style="display: none;" onchange="uploadToolFile('cve', this.files[0])">
+            <button type="button" class="btn-upload" onclick="document.getElementById('file-cve').click()">📁 Upload File</button>
+            <input type="hidden" id="input-cve" value="requirements.txt">
+            <div id="status-cve" class="file-status-pill">requirements.txt (default)</div>
+            <button class="btn-exec" onclick="runTool('cve', [document.getElementById('input-cve').value])">▶ Scan CVEs</button>
+            <button class="btn-demo" onclick="runTool('cve', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 5: JWT Security Auditor -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">🎫 JWT Security Auditor</span>
+            <span class="tool-key-badge">jwt</span>
+          </div>
+          <div class="tool-card-desc">
+            Audit JSON Web Tokens for critical vulnerabilities: alg:none signature bypass, weak HMAC secrets brute-force, and expired/tampered claims.
+          </div>
+          <div class="tool-controls">
+            <input type="text" id="input-jwt" class="tool-input" placeholder="eyJhbGciOi..." value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.XbPfbIHMI6arZ3Y922BhjWgQzWXcXNrz0ogtVhfEd2o">
+            <button class="btn-exec" onclick="runTool('jwt', [document.getElementById('input-jwt').value])">▶ Audit JWT</button>
+            <button class="btn-demo" onclick="runTool('jwt', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 6: TLS Certificate Inspector -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">🔒 TLS & Certificate Inspector</span>
+            <span class="tool-key-badge">tls</span>
+          </div>
+          <div class="tool-card-desc">
+            Inspect SSL/TLS certificate chains, expiration countdowns, Subject Alternative Names (SANs), intermediate CAs, and supported cipher suites.
+          </div>
+          <div class="tool-controls">
+            <input type="text" id="input-tls" class="tool-input" placeholder="example.com:443" value="example.com:443">
+            <button class="btn-exec" onclick="runTool('tls', [document.getElementById('input-tls').value])">▶ Inspect TLS</button>
+            <button class="btn-demo" onclick="runTool('tls', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+        <!-- Tool 7: PHP2Shell Exposure Auditor -->
+        <div class="tool-card">
+          <div class="tool-card-head">
+            <span class="tool-card-title">⚡ PHP2Shell Exposure Auditor</span>
+            <span class="tool-key-badge">php2shell-audit</span>
+          </div>
+          <div class="tool-card-desc">
+            Audit web applications and file upload forms for unrestricted file upload vulnerabilities, extension bypasses, and .htaccess overrides.
+          </div>
+          <div class="tool-controls">
+            <input type="text" id="input-php2shell-audit" class="tool-input" placeholder="https://example.com/upload.php" value="https://example.com/upload.php">
+            <button class="btn-exec" onclick="runTool('php2shell-audit', [document.getElementById('input-php2shell-audit').value])">▶ Audit Uploads</button>
+            <button class="btn-demo" onclick="runTool('php2shell-audit', ['--demo'])">Demo</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Sticky Live Output Terminal -->
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          <div class="terminal-header-left">
+            <div class="terminal-dots">
+              <span class="terminal-dot close"></span>
+              <span class="terminal-dot min"></span>
+              <span class="terminal-dot max"></span>
+            </div>
+            <span class="terminal-title">ATHENA RED CONSOLE // LIVE OUTPUT</span>
+          </div>
+          <span id="job-status-badge" class="terminal-badge">IDLE</span>
+        </div>
+
+        <pre id="terminal-body" class="terminal-body">
+[*] Athena Offensive Wing Initialized.
+[*] Zero external dependencies • 100% Python Standard Library.
+[*] Select a module on the left or click [Demo] to run an interactive audit.
+        </pre>
+
+        <div class="terminal-footer">
+          <span id="job-id-label" style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dark);">JOB: none</span>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="terminal-btn" onclick="copyTerminal()">📋 Copy</button>
+            <button class="terminal-btn" onclick="clearTerminal()">🧹 Clear</button>
+            <button class="terminal-btn" onclick="downloadReport()">💾 Download .txt</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 🏛️ Greek Meander Ribbon Divider -->
+  <div class="meander-ribbon red"></div>
+
+  <!-- ⚖️ Legal & Ethical Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-legal-box" style="border-color: var(--red-border); background: rgba(38, 8, 12, 0.5);">
+        <div class="footer-legal-title" style="color: var(--red-400);">
+          <span>⚖️</span>
+          <span>LEGAL & ETHICAL DISCLAIMER - OFFENSIVE RECONNAISSANCE AUTHORIZATION</span>
+        </div>
+        <p>
+          All offensive capabilities in the Athena Spear are designed exclusively for authorized penetration tests, CTF exercises, and verified security assessments under explicit written consent. Port scanning, crawl analysis, and vulnerability probing against non-consenting systems violates national cybersecurity laws.
+        </p>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 Alexandru Iosif Mocanu (Sonelu). All rights reserved. Distributed under the MIT License.</div>
+        <div>Athena Purple Team Suite v2.0 • Offensive Wing</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Asynchronous Execution & Terminal Poller JS -->
+  <script>
+    let activeJobId = null;
+    let pollInterval = null;
+
+    async function runTool(toolKey, args) {
+      const term = document.getElementById("terminal-body");
+      const badge = document.getElementById("job-status-badge");
+      const jobLabel = document.getElementById("job-id-label");
+
+      term.textContent = `[*] Launching ${toolKey} with args: ${JSON.stringify(args)}...\n[*] Contacting Athena localhost API (POST /api/run)...\n`;
+      badge.textContent = "RUNNING";
+      badge.className = "terminal-badge running";
+
+      if (pollInterval) clearInterval(pollInterval);
+
+      try {
+        const res = await fetch("/api/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tool: toolKey, args: args })
+        });
+        const data = await res.json();
+        if (data.error) {
+          term.textContent += `[!] Error: ${data.error}\n`;
+          badge.textContent = "FAILED";
+          badge.className = "terminal-badge failed";
+          return;
+        }
+
+        activeJobId = data.job_id;
+        jobLabel.textContent = `JOB: ${activeJobId.substring(0, 8)}`;
+
+        pollInterval = setInterval(async () => {
+          try {
+            const jRes = await fetch(`/api/job/${activeJobId}`);
+            if (!jRes.ok) return;
+            const job = await jRes.json();
+            term.textContent = job.output || "[*] Running...";
+            term.scrollTop = term.scrollHeight;
+
+            if (job.status === "completed") {
+              clearInterval(pollInterval);
+              badge.textContent = `COMPLETED (exit ${job.exit_code})`;
+              badge.className = job.exit_code === 0 ? "terminal-badge completed" : "terminal-badge failed";
+            } else if (job.status === "failed") {
+              clearInterval(pollInterval);
+              badge.textContent = "FAILED";
+              badge.className = "terminal-badge failed";
+            }
+          } catch (e) {
+            console.error("Poll error:", e);
+          }
+        }, 350);
+
+      } catch (err) {
+        term.textContent += `[!] Network/Execution failure: ${err.message}\n`;
+        badge.textContent = "FAILED";
+        badge.className = "terminal-badge failed";
+      }
+    }
+
+    function clearTerminal() {
+      document.getElementById("terminal-body").textContent = "[*] Console cleared. Ready for next operation.\n";
+      const badge = document.getElementById("job-status-badge");
+      badge.textContent = "IDLE";
+      badge.className = "terminal-badge";
+      document.getElementById("job-id-label").textContent = "JOB: none";
+    }
+
+    function copyTerminal() {
+      const text = document.getElementById("terminal-body").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Terminal log copied to clipboard!");
+      });
+    }
+
+    function downloadReport() {
+      const text = document.getElementById("terminal-body").textContent;
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `athena-offensive-report-${Date.now()}.txt`;
+      a.click();
+    }
+
+    const ALLOWED_EXTENSIONS = {
+      cve: [".txt", ".json", ".xml", ".lock", ".toml", ".pip", ".req"]
+    };
+
+    async function uploadToolFile(toolKey, file) {
+      if (!file) return;
+      const pill = document.getElementById(`status-${toolKey}`);
+      const hidden = document.getElementById(`input-${toolKey}`);
+      const fileInput = document.getElementById(`file-${toolKey}`);
+
+      const fileName = file.name.toLowerCase();
+      const allowed = ALLOWED_EXTENSIONS[toolKey] || [];
+      const isValid = allowed.some(ext => {
+        if (ext.startsWith(".")) return fileName.endsWith(ext);
+        return fileName === ext;
+      });
+
+      if (!isValid) {
+        if (pill) {
+          pill.style.display = "flex";
+          pill.className = "file-status-pill failed";
+          pill.textContent = `❌ Rejected: '${file.name}' invalid (allowed: ${allowed.join(", ")})`;
+        }
+        if (fileInput) fileInput.value = "";
+        return;
+      }
+
+      if (pill) {
+        pill.style.display = "flex";
+        pill.className = "file-status-pill uploading";
+        pill.textContent = `⏳ Uploading ${file.name}...`;
+      }
+
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("tool", toolKey);
+
+      try {
+        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        const data = await res.json();
+        const serverPath = data.server_path || data.path;
+        if (res.ok && data.status === "success" && serverPath) {
+          if (hidden) hidden.value = serverPath;
+          if (pill) {
+            pill.className = "file-status-pill ready";
+            const kb = Math.round(data.size_bytes / 1024);
+            pill.textContent = `✓ ${file.name} (${kb} KB)`;
+          }
+        } else {
+          if (pill) {
+            pill.className = "file-status-pill failed";
+            pill.textContent = `❌ ${data.error || "Upload rejected"}`;
+          }
+          if (fileInput) fileInput.value = "";
+        }
+      } catch (err) {
+        if (pill) {
+          pill.className = "file-status-pill failed";
+          pill.textContent = `❌ Error: ${err.message}`;
+        }
+        if (fileInput) fileInput.value = "";
+      }
+    }
+  </script>
+</body>
+</html>
