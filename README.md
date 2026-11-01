@@ -22,6 +22,8 @@ Featuring a mythological cyber aesthetic with **translucent Greek Meander waterm
 
 > 💻 **Prefer the Command Line?** Check out [**Athena-CLI**](https://github.com/Sonelu24/Athena-CLI) - our companion terminal suite with an interactive TUI menu, 14 standalone subcommands, and native Kali Linux integration.
 
+![Athena-Web Live Demo](docs/Athenapresentation.gif)
+
 ---
 
 ## 🏛️ Visual Architecture & Dual Wings
