@@ -282,6 +282,28 @@ class AthenaHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.serve_template("blue.html")
             return
 
+        # 🦉 Route: Hidden Easter Egg Credits (/secret)
+        if path == "/secret":
+            self.serve_template("secret.html")
+            return
+
+        # 🤖 Route: robots.txt (CTF / Recon Easter Egg hint for site_mapper)
+        if path == "/robots.txt":
+            robots_txt = (
+                "User-agent: *\n"
+                "Allow: /\n"
+                "Allow: /red\n"
+                "Allow: /blue\n"
+                "# Curious operators who enumerate find the truth:\n"
+                "Disallow: /secret\n"
+            ).encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Content-Length", str(len(robots_txt)))
+            self.end_headers()
+            self.wfile.write(robots_txt)
+            return
+
         # 🔌 REST API: System Status & Health
         if path == "/api/status":
             self.send_json(
